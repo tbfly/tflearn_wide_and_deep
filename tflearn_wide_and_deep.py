@@ -2,8 +2,8 @@
 Pedagogical example realization of wide & deep networks, using TensorFlow and TFLearn.
 
 This is a re-implementation of http://arxiv.org/abs/1606.07792, using the combination
-of a wide linear model, and a deep feed-forward neural network, for binary classification  
-This example realization is based on Tensorflow's TF.Learn tutorial 
+of a wide linear model, and a deep feed-forward neural network, for binary classification
+This example realization is based on Tensorflow's TF.Learn tutorial
 (https://www.tensorflow.org/versions/r0.10/tutorials/wide_and_deep/index.html),
 but implemented in TFLearn.  Note that despite the closeness of names, TFLearn is distinct
 from TF.Learn (previously known as scikit flow).
@@ -38,8 +38,8 @@ COLUMNS = ["age", "workclass", "fnlwgt", "education", "education_num",
            "capital_gain", "capital_loss", "hours_per_week", "native_country",
            "income_bracket"]
 LABEL_COLUMN = "label"
-CATEGORICAL_COLUMNS = {"workclass": 10, "education": 17, "marital_status":8, 
-                       "occupation": 16, "relationship": 7, "race": 6, 
+CATEGORICAL_COLUMNS = {"workclass": 10, "education": 17, "marital_status":8,
+                       "occupation": 16, "relationship": 7, "race": 6,
                        "gender": 3, "native_country": 43, "age_binned": 14}
 CONTINUOUS_COLUMNS = ["age", "education_num", "capital_gain", "capital_loss",
                       "hours_per_week"]
@@ -51,7 +51,9 @@ class TFLearnWideAndDeep(object):
     Wide and deep model, implemented using TFLearn
     '''
     AVAILABLE_MODELS = ["wide", "deep", "wide+deep"]
-    def __init__(self, model_type="wide+deep", verbose=None, name=None, tensorboard_verbose=3, 
+
+
+    def __init__(self, model_type="wide+deep", verbose=None, name=None, tensorboard_verbose=3,
                  wide_learning_rate=0.001, deep_learning_rate=0.001, checkpoints_dir=None):
         '''
         model_type = `str`: wide or deep or wide+deep
@@ -76,6 +78,7 @@ class TFLearnWideAndDeep(object):
             os.mkdir(self.checkpoints_dir)
             print("Created checkpoints directory %s" % self.checkpoints_dir)
         self.build_model([wide_learning_rate, deep_learning_rate])
+
 
     def load_data(self, train_dfn="adult.data", test_dfn="adult.test"):
         '''
@@ -170,9 +173,9 @@ class TFLearnWideAndDeep(object):
         if 'wide' in self.model_type:
             if not 'deep' in self.model_type:
                 tv_wide.append(central_bias)
-            tflearn.regression(wide_network_with_bias, 
+            tflearn.regression(wide_network_with_bias,
                                placeholder=Y_in,
-                               optimizer='sgd', 
+                               optimizer='sgd',
                                #loss='roc_auc_score',
                                loss='binary_crossentropy',
                                metric="accuracy",
@@ -185,9 +188,9 @@ class TFLearnWideAndDeep(object):
         if 'deep' in self.model_type:
             if not 'wide' in self.model_type:
                 tv_wide.append(central_bias)
-            tflearn.regression(deep_network_with_bias, 
+            tflearn.regression(deep_network_with_bias,
                                placeholder=Y_in,
-                               optimizer='adam', 
+                               optimizer='adam',
                                #loss='roc_auc_score',
                                loss='binary_crossentropy',
                                metric="accuracy",
@@ -198,9 +201,9 @@ class TFLearnWideAndDeep(object):
                                name="Y")
 
         if self.model_type=='wide+deep':	# learn central bias separately for wide+deep
-            tflearn.regression(network, 
+            tflearn.regression(network,
                                placeholder=Y_in,
-                               optimizer='adam', 
+                               optimizer='adam',
                                loss='binary_crossentropy',
                                metric="accuracy",
                                learning_rate=learning_rate[0],	# use wide learning rate
@@ -252,6 +255,7 @@ class TFLearnWideAndDeep(object):
             print ("Deep model network %s" % network)
         return network
 
+
     def wide_model(self, inputs, n_inputs):
         '''
         Model - wide, i.e. normal linear model (for logistic regression)
@@ -264,6 +268,7 @@ class TFLearnWideAndDeep(object):
         if self.verbose:
             print ("Wide model network %s" % network)
         return network
+
 
     def prepare_input_data(self, input_data, name="", category_map=None):
         '''
@@ -292,9 +297,9 @@ class TFLearnWideAndDeep(object):
                     if self.verbose:
                         print ("  category %s max=%s,  map=%s" % (cc, cc_max, cc_map))
                     category_map[cc] = cc_map
-                
+
             td = td.replace(category_map)
-    
+
             # bin ages (cuts off extreme values)
             age_bins = [ 0, 12, 18, 25, 30, 35, 40, 45, 50, 55, 60, 65, 80, 65535 ]
             td['age_binned'] = pd.cut(td['age'], age_bins, labels=False)
@@ -316,26 +321,27 @@ class TFLearnWideAndDeep(object):
         validation_batch_size = batch_size or self.testY_dict['Y'].shape[0]
         batch_size = batch_size or self.Y_dict['Y'].shape[0]
 
-        print ("Input data shape = %s; output data shape=%s, batch_size=%s" % (str(self.X_dict['wide_X'].shape), 
-                                                                               str(self.Y_dict['Y'].shape), 
+        print ("Input data shape = %s; output data shape=%s, batch_size=%s" % (str(self.X_dict['wide_X'].shape),
+                                                                               str(self.Y_dict['Y'].shape),
                                                                                batch_size))
-        print ("Test data shape = %s; output data shape=%s, validation_batch_size=%s" % (str(self.testX_dict['wide_X'].shape), 
-                                                                                         str(self.testY_dict['Y'].shape), 
+        print ("Test data shape = %s; output data shape=%s, validation_batch_size=%s" % (str(self.testX_dict['wide_X'].shape),
+                                                                                         str(self.testY_dict['Y'].shape),
                                                                                          validation_batch_size))
         print ("="*60 + "  Training")
-        self.model.fit(self.X_dict, 
+        self.model.fit(self.X_dict,
                        self.Y_dict,
                        n_epoch=n_epoch,
                        validation_set=(self.testX_dict, self.testY_dict),
                        snapshot_step=snapshot_step,
                        batch_size=batch_size,
                        validation_batch_size=validation_batch_size,
-                       show_metric=True, 
+                       show_metric=True,
                        snapshot_epoch=False,
                        shuffle=True,
                        run_id=self.name,
         )
-        
+
+
     def evaluate(self):
         logits = np.array(self.model.predict(self.testX_dict)).reshape([-1])
         print ("="*60 + "  Evaluation")
@@ -345,6 +351,7 @@ class TFLearnWideAndDeep(object):
         Y = pd.Series(self.testY_dict['Y'].astype(np.int32).reshape([-1]))
         self.confusion_matrix = self.output_confusion_matrix(Y, y_pred)
         print ("="*60)
+
 
     def output_confusion_matrix(self, y, y_pred):
         assert y.size == y_pred.size
@@ -358,7 +365,7 @@ class TFLearnWideAndDeep(object):
         print(cmat)
         sys.stdout.flush()
         return cmat
-    
+
 #-----------------------------------------------------------------------------
 
 def CommandLine(args=None):
@@ -384,7 +391,7 @@ def CommandLine(args=None):
     except argparse.ArgumentError:
         pass	# so that CommandLine can be run more than once, for testing
 
-    twad = TFLearnWideAndDeep(model_type=FLAGS.model_type, verbose=FLAGS.verbose, 
+    twad = TFLearnWideAndDeep(model_type=FLAGS.model_type, verbose=FLAGS.verbose,
                               name=FLAGS.run_name, wide_learning_rate=FLAGS.wide_learning_rate,
                               deep_learning_rate=FLAGS.deep_learning_rate,
                               checkpoints_dir=FLAGS.checkpoints_dir)
@@ -405,13 +412,14 @@ def test_wide_and_deep():
     cdir = "test_checkpoints"
     if os.path.exists(cdir):
         os.system("rm -rf %s" % cdir)
-    twad = CommandLine(args=dict(verbose=True, n_epoch=5, model_type="wide+deep", snapshot_step=5, 
+    twad = CommandLine(args=dict(verbose=True, n_epoch=5, model_type="wide+deep", snapshot_step=5,
                                  wide_learning_rate=0.0001, checkpoints_dir=cdir))
     cfiles = glob.glob("%s/*.tfl-*" % cdir)
     print ("cfiles=%s" % cfiles)
     assert(len(cfiles))
     cm = twad.confusion_matrix.values.astype(np.float32)
     assert(cm[1][1])
+
 
 def test_deep():
     import glob
@@ -419,7 +427,7 @@ def test_deep():
     cdir = "test_checkpoints"
     if os.path.exists(cdir):
         os.system("rm -rf %s" % cdir)
-    twad = CommandLine(args=dict(verbose=True, n_epoch=5, model_type="deep", snapshot_step=5, 
+    twad = CommandLine(args=dict(verbose=True, n_epoch=5, model_type="deep", snapshot_step=5,
                                  wide_learning_rate=0.0001, checkpoints_dir=cdir))
     cfiles = glob.glob("%s/*.tfl-*" % cdir)
     print ("cfiles=%s" % cfiles)
@@ -427,13 +435,14 @@ def test_deep():
     cm = twad.confusion_matrix.values.astype(np.float32)
     assert(cm[1][1])
 
+
 def test_wide():
     import glob
     tf.reset_default_graph()
     cdir = "test_checkpoints"
     if os.path.exists(cdir):
         os.system("rm -rf %s" % cdir)
-    twad = CommandLine(args=dict(verbose=True, n_epoch=5, model_type="wide", snapshot_step=5, 
+    twad = CommandLine(args=dict(verbose=True, n_epoch=5, model_type="wide", snapshot_step=5,
                                  wide_learning_rate=0.0001, checkpoints_dir=cdir))
     cfiles = glob.glob("%s/*.tfl-*" % cdir)
     print ("cfiles=%s" % cfiles)
